@@ -3,6 +3,7 @@ package com.democassandra.controller;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.democassandra.model.Tutorial;
 import com.democassandra.repository.TutorialRepository;
+import com.democassandra.service.TutorialService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,22 +20,16 @@ import java.util.UUID;
 public class TutorialController {
 
     @Autowired
-    TutorialRepository tutorialRepository;
+    TutorialService tutorialService;
 
     @GetMapping("/tutorials")
     public ResponseEntity<List<Tutorial>> getAllTutorials(@RequestParam(required = false) String title) {
         try {
-            List<Tutorial> tutorials = new ArrayList<>();
-
-            if (title == null)
-                tutorials.addAll(tutorialRepository.findAll());
-            else
-                tutorials.addAll(tutorialRepository.findByTitleContaining(title));
+            List<Tutorial> tutorials = tutorialService.getAll(title);
 
             if (tutorials.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
-
             return new ResponseEntity<>(tutorials, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -42,18 +37,17 @@ public class TutorialController {
     }
 
     @GetMapping("/tutorials/{id}")
-    public ResponseEntity<Tutorial> getTutorialById(@PathVariable("id") UUID id) {
-        Optional<Tutorial> tutorialData = tutorialRepository.findById(id);
+    public ResponseEntity<Tutorial> getTutorialById(@PathVariable("id") int id) {
+        Optional<Tutorial> tutorialData = tutorialService.get(id);
 
-        return tutorialData.map(tutorial -> new ResponseEntity<>(tutorial, HttpStatus.OK)).orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
-
+        return tutorialData.map(tutorial -> new ResponseEntity<>(tutorial, HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     @PostMapping("/tutorials")
     public ResponseEntity<Tutorial> createTutorial(@RequestBody Tutorial tutorial) {
         try {
-            Tutorial _tutorial = tutorialRepository.save(new Tutorial(tutorial.getId(), tutorial.getTitle(), tutorial.getDescription(), false));
-            return new ResponseEntity<>(_tutorial, HttpStatus.CREATED);
+            return new ResponseEntity<>(tutorialService.create(tutorial), HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
