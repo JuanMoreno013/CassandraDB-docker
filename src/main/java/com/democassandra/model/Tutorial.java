@@ -5,14 +5,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.cassandra.core.mapping.PrimaryKey;
 import org.springframework.data.cassandra.core.mapping.Table;
 
-import java.util.UUID;
-
 @Table
 @NoArgsConstructor
 @Data
 public class Tutorial {
     @PrimaryKey
-    private int id;
+    private Integer id;
 
     private String title;
     private String description;

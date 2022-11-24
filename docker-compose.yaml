@@ -1,0 +1,19 @@
+version: '2'
+services:
+  springboot-app:
+    ports:
+      - "8080:8080"
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        JAR_FILE: /spring-cass.jar
+    restart: always
+    links:
+      - cassandradb
+
+
+  cassandradb:
+    image: cassandra
+    ports:
+      - "9042:9042"

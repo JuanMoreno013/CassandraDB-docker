@@ -19,6 +19,7 @@ public class TutorialService {
 
 
     public List<Tutorial> getAll(String title) {
+        tutorials.clear();
         if (title == null)
             tutorials.addAll(tutorialRepository.findAll());
         else
